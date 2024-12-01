@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Split-Screen Quiz Game</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      display: flex;
+      height: 100vh;
+    }
+    .team {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .team.left {
+      background-color: lightblue;
+    }
+    .team.right {
+      background-color: lightgreen;
+    }
+    .question {
+      text-align: center;
+      padding: 20px;
+      background-color: #f8f9fa;
+      position: absolute;
+      width: 100%;
+      top: 10%;
+      font-size: 24px;
+      font-weight: bold;
+      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .scoreboard {
+      position: absolute;
+      top: 2%;
+      width: 100%;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .choices {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .choices button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+    }
+    .choices button:hover {
+      background-color: #ddd;
+    }
+    .choices button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <div class="scoreboard">Team 1: 0 | Team 2: 0</div>
+  <div class="question">What happens to the equilibrium price if demand increases?</div>
+  <div class="container">
+    <div class="team left">
+      <h2>Team 1</h2>
+      <div class="choices" id="team1-choices">
+        <button onclick="checkAnswer('team1', 'A')">A. Decreases</button>
+        <button onclick="checkAnswer('team1', 'B')">B. Increases</button>
+        <button onclick="checkAnswer('team1', 'C')">C. Stays the same</button>
+        <button onclick="checkAnswer('team1', 'D')">D. None</button>
+      </div>
+    </div>
+    <div class="team right">
+      <h2>Team 2</h2>
+      <div class="choices" id="team2-choices">
+        <button onclick="checkAnswer('team2', '1')">1. Decreases</button>
+        <button onclick="checkAnswer('team2', '2')">2. Increases</button>
+        <button onclick="checkAnswer('team2', '3')">3. Stays the same</button>
+        <button onclick="checkAnswer('team2', '4')">4. None</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+const questions = [
+  {
+    question: "What happens to the equilibrium price if demand increases?",
+    choicesTeam1: ["A. Decreases", "B. Increases", "C. Stays the same", "D. None"],
+    choicesTeam2: ["1. Decreases", "2. Increases", "3. Stays the same", "4. None"],
+    correctTeam1: "B",
+    correctTeam2: "2",
+    explanation: "When demand increases, equilibrium price typically rises."
+  },
+  {
+    question: "What happens to supply when production costs decrease?",
+    choicesTeam1: ["A. Increases", "B. Decreases", "C. No change", "D. None"],
+    choicesTeam2: ["1. Increases", "2. Decreases", "3. No change", "4. None"],
+    correctTeam1: "A",
+    correctTeam2: "1",
+    explanation: "Lower production costs make it easier to produce goods, increasing supply."
+  },
+  {
+    question: "What happens to demand if consumer income increases for a normal good?",
+    choicesTeam1: ["A. Decreases", "B. Increases", "C. No change", "D. None"],
+    choicesTeam2: ["1. Decreases", "2. Increases", "3. No change", "4. None"],
+    correctTeam1: "B",
+    correctTeam2: "2",
+    explanation: "For normal goods, demand rises as consumer income increases."
+  },
+  {
+    question: "What happens to demand for inferior goods if consumer income increases?",
+    choicesTeam1: ["A. Decreases", "B. Increases", "C. No change", "D. None"],
+    choicesTeam2: ["1. Decreases", "2. Increases", "3. No change", "4. None"],
+    correctTeam1: "A",
+    correctTeam2: "1",
+    explanation: "For inferior goods, demand decreases as consumer income rises."
+  },
+  {
+    question: "What effect does a technological advancement have on supply?",
+    choicesTeam1: ["A. Decreases", "B. Increases", "C. No change", "D. None"],
+    choicesTeam2: ["1. Decreases", "2. Increases", "3. No change", "4. None"],
+    correctTeam1: "B",
+    correctTeam2: "2",
+    explanation: "Technological advancements often lead to an increase in supply."
+  },
+  {
+    question: "What happens to supply if a tax is imposed on a product?",
+    choicesTeam1: ["A. Increases", "B. Decreases", "C. No change", "D. None"],
+    choicesTeam2: ["1. Increases", "2. Decreases", "3. No change", "4. None"],
+    correctTeam1: "B",
+    correctTeam2: "2",
+    explanation: "Taxes increase production costs, reducing supply."
+  },
+  {
+    question: "What happens to supply if a subsidy is given to producers?",
+    choicesTeam1: ["A. Increases", "B. Decreases", "C. No change", "D. None"],
+    choicesTeam2: ["1. Increases", "2. Decreases", "3. No change", "4. None"],
+    correctTeam1: "A",
+    correctTeam2: "1",
+    explanation: "Subsidies lower production costs, encouraging higher supply."
+  },
+  {
+    question: "What happens to equilibrium quantity if both supply and demand increase?",
+    choicesTeam1: ["A. Increases", "B. Decreases", "C. No change", "D. None"],
+    choicesTeam2: ["1. Increases", "2. Decreases", "3. No change", "4. None"],
+    correctTeam1: "A",
+    correctTeam2: "1",
+    explanation: "When both supply and demand increase, equilibrium quantity rises."
+  },
+  {
+    question: "What happens to equilibrium price if supply decreases and demand remains constant?",
+    choicesTeam1: ["A. Decreases", "B. Increases", "C. No change", "D. None"],
+    choicesTeam2: ["1. Decreases", "2. Increases", "3. No change", "4. None"],
+    correctTeam1: "B",
+    correctTeam2: "2",
+    explanation: "A decrease in supply causes equilibrium price to rise."
+  },
+  {
+    question: "What is the effect of a price floor set above equilibrium price?",
+    choicesTeam1: ["A. Surplus", "B. Shortage", "C. No effect", "D. None"],
+    choicesTeam2: ["1. Surplus", "2. Shortage", "3. No effect", "4. None"],
+    correctTeam1: "A",
+    correctTeam2: "1",
+    explanation: "A price floor above equilibrium price leads to a surplus."
+  },
+  {
+    question: "What happens to demand for a complementary good if its complement's price increases?",
+    choicesTeam1: ["A. Decreases", "B. Increases", "C. No change", "D. None"],
+    choicesTeam2: ["1. Decreases", "2. Increases", "3. No change", "4. None"],
+    correctTeam1: "A",
+    correctTeam2: "1",
+    explanation: "Demand for complementary goods decreases when their complement's price rises."
+  },
+  {
+    question: "What is the effect of a price ceiling set below equilibrium price?",
+    choicesTeam1: ["A. Surplus", "B. Shortage", "C. No effect", "D. None"],
+    choicesTeam2: ["1. Surplus", "2. Shortage", "3. No effect", "4. None"],
+    correctTeam1: "B",
+    correctTeam2: "2",
+    explanation: "A price ceiling below equilibrium price leads to a shortage."
+  },
+  {
+    question: "What happens to the market when a quota is imposed?",
+    choicesTeam1: ["A. Supply decreases", "B. Demand increases", "C. Both decrease", "D. None"],
+    choicesTeam2: ["1. Supply decreases", "2. Demand increases", "3. Both decrease", "4. None"],
+    correctTeam1: "A",
+    correctTeam2: "1",
+    explanation: "A quota limits the amount supplied, decreasing overall supply."
+  },
+  {
+    question: "What happens to equilibrium price if demand decreases and supply remains constant?",
+    choicesTeam1: ["A. Decreases", "B. Increases", "C. No change", "D. None"],
+    choicesTeam2: ["1. Decreases", "2. Increases", "3. No change", "4. None"],
+    correctTeam1: "A",
+    correctTeam2: "1",
+    explanation: "When demand decreases, equilibrium price falls."
+  },
+  {
+    question: "What happens to demand if future prices are expected to rise?",
+    choicesTeam1: ["A. Decreases", "B. Increases", "C. No change", "D. None"],
+    choicesTeam2: ["1. Decreases", "2. Increases", "3. No change", "4. None"],
+    correctTeam1: "B",
+    correctTeam2: "2",
+    explanation: "If future prices are expected to rise, current demand increases."
+  },
+  {
+    question: "What happens to demand if future prices are expected to fall?",
+    choicesTeam1: ["A. Decreases", "B. Increases", "C. No change", "D. None"],
+    choicesTeam2: ["1. Decreases", "2. Increases", "3. No change", "4. None"],
+    correctTeam1: "A",
+    correctTeam2: "1",
+    explanation: "If future prices are expected to fall, current demand decreases."
+  },
+  {
+    question: "What happens to equilibrium price if supply increases and demand decreases?",
+    choicesTeam1: ["A. Decreases", "B. Increases", "C. No change", "D. None"],
+    choicesTeam2: ["1. Decreases", "2. Increases", "3. No change", "4. None"],
+    correctTeam1: "A",
+    correctTeam2: "1",
+    explanation: "When supply increases and demand decreases, equilibrium price falls."
+  },
+  {
+    question: "What is the primary effect of advertising on demand?",
+    choicesTeam1: ["A. Increases", "B. Decreases", "C. No change", "D. None"],
+    choicesTeam2: ["1. Increases", "2. Decreases", "3. No change", "4. None"],
+    correctTeam1: "A",
+    correctTeam2: "1",
+    explanation: "Advertising generally increases demand by making products more appealing."
+  },
+  // Continue to add more economic scenarios up to 25 questions.
+];
+
+
+    let currentQuestionIndex = 0;
+    let team1Score = 0;
+    let team2Score = 0;
+    let team1Answered = false;
+    let team2Answered = false;
+
+    function loadQuestion() {
+      if (currentQuestionIndex >= questions.length) {
+        endGame();
+        return;
+      }
+
+      const question = questions[currentQuestionIndex];
+      document.querySelector('.question').innerText = question.question;
+
+      const team1Buttons = document.querySelectorAll('#team1-choices button');
+      const team2Buttons = document.querySelectorAll('#team2-choices button');
+
+      team1Buttons.forEach((btn, idx) => {
+        btn.innerText = question.choicesTeam1[idx];
+        btn.disabled = false;
+      });
+
+      team2Buttons.forEach((btn, idx) => {
+        btn.innerText = question.choicesTeam2[idx];
+        btn.disabled = false;
+      });
+
+      team1Answered = false;
+      team2Answered = false;
+    }
+
+function checkAnswer(team, answer) {
+  const question = questions[currentQuestionIndex];
+  let isCorrect = false;
+
+  if (team === "team1" && !team1Answered) {
+    team1Answered = true;
+    if (answer === question.correctTeam1) {
+      team1Score++;
+      isCorrect = true;
+      alert("Team 1 answered correctly!");
+    } else {
+      alert("Team 1 is incorrect.");
+    }
+  } else if (team === "team2" && !team2Answered) {
+    team2Answered = true;
+    if (answer === question.correctTeam2) {
+      team2Score++;
+      isCorrect = true;
+      alert("Team 2 answered correctly!");
+    } else {
+      alert("Team 2 is incorrect.");
+    }
+  }
+
+  updateScoreboard();
+
+  // Automatically load the next question if answered correctly
+  if (isCorrect) {
+    currentQuestionIndex++;
+    loadQuestion();
+  } else if (team1Answered && team2Answered) {
+    // Show explanation if both teams answered incorrectly
+    if (answer !== question.correctTeam1 && answer !== question.correctTeam2) {
+      alert("Explanation: " + question.explanation);
+    }
+    currentQuestionIndex++;
+    loadQuestion();
+  }
+}
+
+    function updateScoreboard() {
+      document.querySelector('.scoreboard').innerText = `Team 1: ${team1Score} | Team 2: ${team2Score}`;
+    }
+
+    function endGame() {
+      const winner = team1Score > team2Score ? "Team 1" : team2Score > team1Score ? "Team 2" : "No one";
+      alert(`Game Over! ${winner} wins!\nFinal Score: Team 1: ${team1Score} | Team 2: ${team2Score}`);
+    }
+
+    // Load the first question
+    loadQuestion();
+  </script>
+</body>
+</html>
